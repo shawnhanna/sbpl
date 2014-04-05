@@ -2,6 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <stdio.h>
+#include <string>
+#include <iomanip>
 #include <GeographicLib/UTMUPS.hpp>
 #include <limits>
 #include <cmath>
@@ -16,11 +19,21 @@ int main () {
   ifstream infile ("../../sol.txt");
   ofstream outfile ("example.txt");
 
+
   double startX = 591775.3;
   double startY = 4476386.2;
 
   double lastX = 0;
   double lastY = 0;
+  {
+    double lat = 40.443505, lon = -79.945562; // Starting location
+    int zone;
+    bool northp;
+    UTMUPS::Forward(lat, lon, zone, northp, startX, startY);
+    string zonestr = UTMUPS::EncodeZone(zone, northp);
+    cout << "starting location: "<< fixed << setprecision(dbl::digits10)
+          << " " << startX << " " << startY << "\n";
+  }
 
   int count = 0;
   if (infile.is_open() && infile.is_open())
