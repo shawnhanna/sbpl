@@ -4,6 +4,7 @@
 #include <string>
 #include <GeographicLib/UTMUPS.hpp>
 #include <limits>
+#include <cmath>
 
 using namespace std;
 using namespace GeographicLib;
@@ -18,8 +19,8 @@ int main () {
   double startX = 591775.3;
   double startY = 4476386.2;
 
-  double lastLat = 0;
-  double lastLon = 0;
+  double lastX = 0;
+  double lastY = 0;
 
   int count = 0;
   if (infile.is_open() && infile.is_open())
@@ -40,29 +41,33 @@ int main () {
         const char *str = line.c_str();
         double x, y, theta;
         sscanf(str, "%lf %lf %lf", &x, &y, &theta);
-
         x = x+startX;
         y = y+startY;
 
-        double lat = -1, lon = -1; // Baghdad
-
-        //Convert to lat, long
-        int zone;
-        bool northp;
-        string zonestr = "17N";
-        UTMUPS::DecodeZone(zonestr, zone, northp);
-        UTMUPS::Reverse(zone, northp, x, y, lat, lon);
-        // cout << lat << " " << lon << "\n";
-        if (lastLat != lat || lastLon == lon)
+        if (fabs(lastX - x) > 2 || fabs(y - lastY) > 2)
         {
-          printf("%15lf %15lf\n", lat, lon);
+
+          printf("%lf %lf\n",x, y);
+          double lat = -1, lon = -1; // Baghdad
+
+          //Convert to lat, long
+          int zone;
+          bool northp;
+          string zonestr = "17N";
+          UTMUPS::DecodeZone(zonestr, zone, northp);
+          UTMUPS::Reverse(zone, northp, x, y, lat, lon);
+          // cout << lat << " " << lon << "\n";
           outfile.precision(dbl::digits10);
           outfile << lat;
           outfile << ", ";
           outfile << fixed << lon << endl;
 
-          lastLat = lat;
-          lastLon = lon;
+          lastX = x;
+          lastY = y;
+        }
+        else
+        {
+          // cout<< "not keeping value. too close: "<<count<<endl;
         }
       }
       catch (const exception& e) {
