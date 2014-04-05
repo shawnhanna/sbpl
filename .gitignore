@@ -7,11 +7,8 @@ sol.txt
 
 bin/*
 lib/*
-CMakeFiles/*
-build/*
+CMakeFiles
+build
 
 .project
 .cproject
-
-*/CMakeFiles/*
-*/build/*
