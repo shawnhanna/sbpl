@@ -50,7 +50,7 @@ public:
 
   void start()
   {
-    std::cout << "TCP start?\n";
+    // std::cout << "TCP start?\n";
     boost::asio::async_read_until(socket_, data_, "\r\n",
         boost::bind(&tcp_connection::handle_request_line, this, _1));
   }
@@ -80,7 +80,6 @@ public:
       {
         //received a get path request... return it!!!
         write_message(get_path());
-
       }
 
     }
@@ -119,26 +118,27 @@ public:
 private:
   void start_accept()
   {
-    new_connection =
+    tcp_connection::pointer connection =
       tcp_connection::create(acceptor_.io_service());
+    new_connections.push_back(connection);
 
-    acceptor_.async_accept(new_connection->socket(),
-        boost::bind(&tcp_server::handle_accept, this, new_connection,
+    acceptor_.async_accept(connection->socket(),
+        boost::bind(&tcp_server::handle_accept, this, connection,
           boost::asio::placeholders::error));
     // std::cout << "setup new server?"<<std::endl;
   }
 
-  void handle_accept(tcp_connection::pointer new_connection,
+  void handle_accept(tcp_connection::pointer connection,
       const boost::system::error_code& error)
   {
     if (!error)
     {
-      new_connection->start();
-      //start_accept();
+      connection->start();
+      start_accept();
       // std::cout << "started accept"<<std::endl;
     }
   }
-  tcp_connection::pointer new_connection;
+  std::vector<tcp_connection::pointer> new_connections;
   tcp::acceptor acceptor_;
 };
 
