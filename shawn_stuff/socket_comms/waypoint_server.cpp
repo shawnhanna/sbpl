@@ -50,14 +50,47 @@ public:
 
   void start()
   {
-    message_ = get_path();
-    std::cout << "sending path: "<<message_<<std::endl<<std::endl;
+    std::cout << "TCP start?\n";
+    boost::asio::async_read_until(socket_, data_, "\r\n",
+        boost::bind(&tcp_connection::handle_request_line, this, _1));
+  }
 
+  void write_message(std::string message)
+  {
+    message_ = message;
     boost::asio::async_write(socket_, boost::asio::buffer(message_),
         boost::bind(&tcp_connection::handle_write, shared_from_this(),
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred));
+
   }
+
+  void handle_request_line(boost::system::error_code ec)
+  {
+    std::cout << "Got new line?\n";
+    if (!ec)
+    {
+      std::string line;
+      std::istream is(&data_);
+      // is.unsetf(std::ios_base::skipws);
+      is >> line;
+
+      std::cout << "got: "<<line<<"\n";
+      if (line.compare("getpath") == 0)
+      {
+        //received a get path request... return it!!!
+        write_message(get_path());
+
+      }
+
+    }
+    else
+    {
+      throw boost::system::system_error(ec); // Some other error.
+    }
+  }
+
+  boost::asio::streambuf data_;
 
 private:
   tcp_connection(boost::asio::io_service& io_service)
@@ -86,7 +119,7 @@ public:
 private:
   void start_accept()
   {
-    tcp_connection::pointer new_connection =
+    new_connection =
       tcp_connection::create(acceptor_.io_service());
 
     acceptor_.async_accept(new_connection->socket(),
@@ -101,11 +134,11 @@ private:
     if (!error)
     {
       new_connection->start();
-      start_accept();
+      //start_accept();
       // std::cout << "started accept"<<std::endl;
     }
   }
-
+  tcp_connection::pointer new_connection;
   tcp::acceptor acceptor_;
 };
 
