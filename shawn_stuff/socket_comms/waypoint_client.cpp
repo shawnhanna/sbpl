@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
       boost::array<char, 128> buf;
       boost::system::error_code error;
 
-      std::string msg = std::string("getpath\r\n");
+      std::string msg = std::string("getpath 10.43 50.42324234234234 0.434 15402.0\r\n");
       std::cout << "sending: "<<msg<<std::endl;
       socket.write_some(boost::asio::buffer(msg), error);
       std::cout << "finished sending\n";
