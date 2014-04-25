@@ -17,14 +17,14 @@ typedef std::numeric_limits< double > dbl;
 int main () {
   string line;
   ifstream infile ("../../sol.txt");
-  ofstream outfile ("example.txt");
-
+  ofstream outfile ("lat_long_output.txt");
 
   double startX = 591775.3;
   double startY = 4476386.2;
 
   double lastX = 0;
   double lastY = 0;
+  /*
   {
     double lat = 40.443505, lon = -79.945562; // Starting location
     int zone;
@@ -33,7 +33,7 @@ int main () {
     string zonestr = UTMUPS::EncodeZone(zone, northp);
     cout << "starting location: "<< fixed << setprecision(dbl::digits10)
           << " " << startX << " " << startY << "\n";
-  }
+  }*/
 
   int count = 0;
   if (infile.is_open() && infile.is_open())
@@ -42,11 +42,6 @@ int main () {
     while ( getline (infile,line) )
     {
       count++;
-      // if (count %5 != 0)
-      // {
-      //   continue;
-      // }
-
       // cout << line << '\n';
 
       try {
@@ -71,8 +66,8 @@ int main () {
           UTMUPS::Reverse(zone, northp, x, y, lat, lon);
           // cout << lat << " " << lon << "\n";
           outfile.precision(dbl::digits10);
-          outfile << lat;
-          outfile << ", ";
+          outfile << fixed << lat;
+          outfile << " ";
           outfile << fixed << lon << endl;
 
           lastX = x;
@@ -97,6 +92,6 @@ int main () {
   {
     cout << "Unable to open file";
   }
-  cout << "Count = "<<count;
+  cout << "Count = "<<count<<endl;
   return 0;
 }
