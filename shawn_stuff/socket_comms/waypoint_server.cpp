@@ -30,7 +30,7 @@ std::string get_path(double startX, double startY, double endX, double endY)
 
   //get the start coordinate
   std::cout << "startx: "<<startX<<" starty: "<<startY<<" endx: "<<endX<<" endy: "<<endY<<"\n";
-  return std::string("40.444985 -80.022676\n40.442356 -80.018728\n40.444038 -80.014694\n40.440788 -80.014715\n40.439531 -80.012076\npoints end");
+  return std::string("40.444985 -80.022676\n40.442356 -80.018728\n40.444038 -80.014694\n40.440788 -80.014715\n40.439531 -80.012076\npoints end\n");
 }
 
 class ui_connection
@@ -52,8 +52,8 @@ public:
 
   void start()
   {
-    // std::cout << "TCP start?\n";
-    boost::asio::async_read_until(socket_, data_, "\r\n",
+    std::cout << "TCP start\n";
+    boost::asio::async_read_until(socket_, data_, "\n",
         boost::bind(&ui_connection::handle_request_line, this, _1));
   }
 
@@ -87,7 +87,6 @@ public:
         //received a get path request... return it!!!
         write_message(get_path(x,y,ex,ey));
       }
-
     }
     else
     {

@@ -40,17 +40,17 @@ int main(int argc, char* argv[])
     }
     if (error)
       throw boost::system::system_error(error);
+
     sleep(1);
     for (;;)
     {
       boost::array<char, 128> buf;
       boost::system::error_code error;
 
-      std::string msg = std::string("getpath 10.43 50.42324234234234 0.434 15402.0\r\n");
-      std::cout << "sending: "<<msg<<std::endl;
+      std::string msg = std::string("getpath 10.43 50.42324234234234 0.434 15402.0\n");
+      std::cout << "sending: "<<msg;
       socket.write_some(boost::asio::buffer(msg), error);
       std::cout << "finished sending\n";
-
 
       if (error == boost::asio::error::eof)
         break; // Connection closed cleanly by peer.
