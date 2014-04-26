@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
       boost::array<char, 128> buf;
       boost::system::error_code error;
 
-      std::string msg = std::string("getpath 10.43 50.42324234234234 0.434 15402.0\n");
+      std::string msg = std::string("getpath 40.436869 -79.948848 40.436923 -79.947689\n");
       std::cout << "sending: "<<msg;
       socket.write_some(boost::asio::buffer(msg), error);
       std::cout << "finished sending\n";
@@ -57,13 +57,11 @@ int main(int argc, char* argv[])
       else if (error)
         throw boost::system::system_error(error); // Some other error.
 
-      size_t len = socket.read_some(boost::asio::buffer(buf), error);
-      if (error == boost::asio::error::eof)
-        break; // Connection closed cleanly by peer.
-      else if (error)
-        throw boost::system::system_error(error); // Some other error.
+      while(true){
+        size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
-      std::cout.write(buf.data(), len);
+        std::cout.write(buf.data(), len);
+      }
     }
   }
   catch (std::exception& e)

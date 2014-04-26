@@ -41,6 +41,9 @@ def get_map(filename):
     map_lines = [p.strip().split() for p in map_lines]
     flattened_values = map(int, [item for sublist in map_lines for item in
                                  sublist])
+    print(len(flattened_values))
+    print(size_x)
+    print(size_y)
     map_values = np.array(flattened_values).reshape(size_y, size_x)
     return (map_values, cell_size)
 
