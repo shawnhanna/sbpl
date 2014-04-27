@@ -678,11 +678,11 @@ int planxythetamlevlat(PlannerType plannerType, char* envCfgFilename, char* motP
     unsigned char cost_inscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
     unsigned char cost_possibly_circumscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
     //no costs are indicative of whether a cell is within inner circle
-    cost_inscribed_thresh_addlevels[0] = 255; 
+    cost_inscribed_thresh_addlevels[0] = 255;
     //no costs are indicative of whether a cell is within outer circle
-    cost_possibly_circumscribed_thresh_addlevels[0] = 0; 
+    cost_possibly_circumscribed_thresh_addlevels[0] = 0;
     //no costs are indicative of whether a cell is within inner circle
-    cost_inscribed_thresh_addlevels[1] = 255; 
+    cost_inscribed_thresh_addlevels[1] = 255;
     //no costs are indicative of whether a cell is within outer circle
     cost_possibly_circumscribed_thresh_addlevels[1] = 0;
     if (!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV,
@@ -1332,7 +1332,7 @@ int planandnavigatexythetalat(PlannerType plannerType, char* envCfgFilename, cha
                 environment_navxythetalat.GetPredsofChangedEdges(&changedcellsV, &preds_of_changededgesIDV);
                 // let know the incremental planner about them
                 //use by AD* planner (incremental)
-                ((ADPlanner*)planner)->update_preds_of_changededges(&preds_of_changededgesIDV); 
+                ((ADPlanner*)planner)->update_preds_of_changededges(&preds_of_changededgesIDV);
                 printf("%d states were affected\n", (int)preds_of_changededgesIDV.size());
             }
         }

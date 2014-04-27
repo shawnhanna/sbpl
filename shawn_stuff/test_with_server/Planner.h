@@ -5,9 +5,10 @@
 #include <iomanip>
 #include <limits>
 
-
 #include <iostream>
 #include <string>
+
+typedef std::pair<double, double> Point;
 
 class Planner
 {
@@ -16,15 +17,17 @@ public:
     ~Planner();
 
     void planxythetalat(char* envCfgFilename, char* motPrimFilename,
-        std::pair<double, double> start, std::pair<double,double> end);
+        Point start, Point end);
+
+    void addObstacle(std::vector<Point> points);
 
     void writeSolution(std::string filename);
 
     int runPlanner(int allocated_time_secs);
 
-    std::vector< std::pair< double, double > > getpath();
-    std::vector< std::pair<double, double> > convertToGPS(std::vector< std::pair<double, double> >& utmCoords);
-    std::vector< std::pair< double, double > > getgps();
+    std::vector< Point > getpath();
+    std::vector< Point > convertToGPS(std::vector< Point >& utmCoords);
+    std::vector< Point > getgps();
 
     void initializePlanner(int start_id, int goal_id,
                        double initialEpsilon,
@@ -39,9 +42,8 @@ public:
                    char* envCfgFilename, char* motPrimFilename);
     void createFootprint(std::vector<sbpl_2Dpt_t>& perimeter);
 
-
 private:
-    boost::shared_ptr<SBPLPlanner> planner_;
+    boost::shared_ptr<ARAPlanner> planner_;
     EnvironmentNAVXYTHETALAT env;
     std::vector<int> solution_stateIDs;
 

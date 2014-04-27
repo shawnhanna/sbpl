@@ -8,8 +8,27 @@ Planner::Planner()
 
 Planner::~Planner()
 {
-
 }
+
+void Planner::addObstacle(std::vector<Point> points)
+{
+    double cellsize = 0.1; //meters
+    for (int i = 0; i < points.size(); ++i)
+    {
+        // convert UTM to x/y index
+        double x = points[i].first - startX;
+        double y = points[i].second - startY;
+
+        int xDiscrete = CONTXY2DISC(x, cellsize);
+        int yDiscrete = CONTXY2DISC(y, cellsize);
+
+        // update map cell
+        env.UpdateCost(xDiscrete, yDiscrete, 255);
+    }
+
+    planner_->costs_changed(); //use by ARA* planner (non-incremental)
+}
+
 
 // creating the footprint
 void Planner::createFootprint(std::vector<sbpl_2Dpt_t>& perimeter){
@@ -30,6 +49,7 @@ void Planner::createFootprint(std::vector<sbpl_2Dpt_t>& perimeter){
     perimeter.push_back(pt_m);
 }
 
+
 void Planner::initializeEnv(std::vector<sbpl_2Dpt_t>& perimeter,
                    char* envCfgFilename, char* motPrimFilename){
     if (!env.InitializeEnv(envCfgFilename, perimeter, motPrimFilename)) {
@@ -38,6 +58,7 @@ void Planner::initializeEnv(std::vector<sbpl_2Dpt_t>& perimeter,
     }
 }
 
+
 void Planner::setEnvStartGoal(double start_x, double start_y, double start_theta,
                      double goal_x, double goal_y, double goal_theta,
                      int& start_id, int& goal_id){
@@ -45,6 +66,7 @@ void Planner::setEnvStartGoal(double start_x, double start_y, double start_theta
     start_id = env.SetStart(start_x, start_y, start_theta);
     goal_id = env.SetGoal(goal_x, goal_y, goal_theta);
 }
+
 
 void Planner::initializePlanner(int start_id, int goal_id,
                        double initialEpsilon,
@@ -66,6 +88,7 @@ void Planner::initializePlanner(int start_id, int goal_id,
     planner_->set_search_mode(bsearchuntilfirstsolution);
 }
 
+
 int Planner::runPlanner(int allocated_time_secs){
     int bRet = planner_->replan(allocated_time_secs, &solution_stateIDs);
 
@@ -75,6 +98,7 @@ int Planner::runPlanner(int allocated_time_secs){
         printf("Solution does not exist\n");
     return bRet;
 }
+
 
 void Planner::writeSolution(std::string filename)
 {
@@ -110,20 +134,22 @@ void Planner::writeSolution(std::string filename)
     fclose(fSol);
 }
 
-std::vector< std::pair< double, double > > Planner::getpath()
+
+std::vector< Point > Planner::getpath()
 {
-    std::vector< std::pair<double, double> > retVec;
+    std::vector< Point > retVec;
     // write the continuous solution to file
     std::vector<sbpl_xy_theta_pt_t> xythetaPath;
     env.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs, &xythetaPath);
     for (unsigned int i = 0; i < xythetaPath.size(); i++) {
-        retVec.push_back(std::pair<double, double>(xythetaPath.at(i).x,
+        retVec.push_back(Point(xythetaPath.at(i).x,
                                           xythetaPath.at(i).y));
     }
     return retVec;
 }
 
-void Planner::planxythetalat(char* envCfgFilename, char* motPrimFilename, std::pair<double, double> start, std::pair<double,double> end){
+
+void Planner::planxythetalat(char* envCfgFilename, char* motPrimFilename, Point start, Point end){
     // set the perimeter of the robot
     std::vector<sbpl_2Dpt_t> perimeter;
     createFootprint(perimeter);
@@ -155,12 +181,12 @@ void Planner::planxythetalat(char* envCfgFilename, char* motPrimFilename, std::p
 }
 
 
-std::vector< std::pair<double, double> > Planner::convertToGPS(std::vector< std::pair<double, double> >& utmCoords)
+std::vector< Point > Planner::convertToGPS(std::vector< Point >& utmCoords)
 {
     std::cout << "Getting coordinates in GPS coords\n";
     using namespace GeographicLib;
 
-    std::vector< std::pair<double, double> > latlonCoords;
+    std::vector< Point > latlonCoords;
 
     for (int i = 0; i < utmCoords.size(); i++)
     {
@@ -179,29 +205,29 @@ std::vector< std::pair<double, double> > Planner::convertToGPS(std::vector< std:
         UTMUPS::Reverse(zone, northp, x, y, lat, lon);
         // std::cout << "lat = "<<lat<<" lon = "<<lon<<"\n";
 
-        std::pair<double, double> latlong(lat,lon);
+        Point latlong(lat,lon);
         latlonCoords.push_back(latlong);
     }
     return latlonCoords;
 }
 
 
-std::vector< std::pair<double, double> > Planner::getgps()
+std::vector< Point > Planner::getgps()
 {
-    std::vector< std::pair<double, double> > path = getpath();
+    std::vector< Point > path = getpath();
     // trim path
-    std::vector< std::pair<double, double> > newPath;
+    std::vector< Point > newPath;
     double lastX = -100000000;
     double lastY = -100000000;
 
-    for (std::vector<std::pair<double, double> >::iterator i = path.begin(); i != path.end(); ++i)
+    for (std::vector<Point >::iterator i = path.begin(); i != path.end(); ++i)
     {
         double x = (*i).first;
         double y = (*i).second;
 
         if (fabs(lastX - x) > 2 || fabs(y - lastY) > 2)
         {
-            newPath.push_back(std::pair<double, double>(x,y));
+            newPath.push_back(Point(x,y));
             lastX = x;
             lastY = y;
         }
@@ -209,7 +235,8 @@ std::vector< std::pair<double, double> > Planner::getgps()
     return convertToGPS(newPath);
 }
 
-// Update comes in as a lat/long pair
+
+// Update comes in as a lat/PointpdateStartEnd(double sx, double sy, double ex, double ey)
 bool Planner::updateStartEnd(double sx, double sy, double ex, double ey)
 {
     using namespace GeographicLib;
